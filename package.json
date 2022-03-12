@@ -1,0 +1,24 @@
+{
+  "name": "nonogram",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "typings": "./index.d.ts",
+  "scripts": {
+    "demo": "node demo"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OsirisX3R0/nonogram.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/OsirisX3R0/nonogram/issues"
+  },
+  "homepage": "https://github.com/OsirisX3R0/nonogram#readme",
+  "devDependencies": {
+    "typescript": "^4.6.2"
+  }
+}
