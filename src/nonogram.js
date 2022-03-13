@@ -1,4 +1,3 @@
-const { ModuleKind } = require("typescript");
 const TileFilledEnum = require("./enums/TileFilledEnum");
 const TileFlaggedEnum = require("./enums/TileFlaggedEnum");
 const TileStateEnum = require("./enums/TileStateEnum");
@@ -11,7 +10,7 @@ class Tile {
   constructor(value, x, y) {
     this.x = x;
     this.y = y;
-    this.filled = value ? TileFilledEnum.FILLED : TileFilledEnum.EMPTY;
+    this.filled = value ? true : false;
     this.state = TileStateEnum.CLOSED;
     this.flagged = TileFlaggedEnum.UNFLAGGED;
   }
@@ -25,45 +24,54 @@ class Board {
   constructor(grid) {
     let rowCount = 0;
 
-    this._grid = grid.map((row, y) =>
+    this.grid = grid.map((row, y) =>
       row.map((tile, x) => new Tile(tile, x, y))
     );
 
-    this._numbers = {
-      rows: grid.reduce((rows, row) => {
-        return [
-          ...rows,
-          row.reduce((tiles, tile) => {
-            if (!tile) {
+    this.rowNumbers = grid.reduce(
+      (rows, row) => [
+        ...rows,
+        // Check each tile in each row in the grid
+        row.reduce((tiles, tile, tileIndex) => {
+          // If falsey...
+          if (!tile) {
+            // Either save the current count or continue on if it is 0
+            let finished = rowCount;
+            rowCount = 0;
+            return finished ? [...tiles, finished] : tiles;
+            // If truthy...
+          } else {
+            // Iterate the count
+            rowCount++;
+            // If it's the last tile in the row, save the current count
+            if (tileIndex === row.length - 1) {
               let finished = rowCount;
               rowCount = 0;
-              return rowCount ? [...tiles, finished] : tiles;
-            } else {
-              rowCount++;
-              return tiles;
-            }
-          }, []),
-        ];
-      }, []),
-      columns: grid.reduce((rows, row, rowIndex) => {
-        return [
-          ...rows,
-          row.reduce((tiles, tile, tileIndex) => {
-            let updatedTiles = [];
-
-            if (!tiles[tileIndex]) {
-              return [...tiles, tile ? 1 : 0];
-            } else {
-              updatedTiles = tiles.map((x, i) =>
-                i === tiles[tileIndex] ? (tile ? x++ : x) : x
-              );
+              return [...tiles, finished];
             }
 
-            return updatedTiles;
-          }, []),
-        ];
-      }, []),
-    };
+            return tiles;
+          }
+        }, []),
+      ],
+      []
+    );
+
+    this.colNumbers = grid.reduce((rows, row, rowIndex) => {
+      return row.reduce((tiles, tile, tileIndex) => {
+        let updatedTiles = [];
+
+        if (!tiles[tileIndex]) {
+          return [...tiles, tile ? 1 : 0];
+        } else {
+          updatedTiles = tiles.map((x, i) =>
+            i === tiles[tileIndex] ? (tile ? x++ : x) : x
+          );
+        }
+
+        return updatedTiles;
+      }, []);
+    }, []);
   }
 }
 
