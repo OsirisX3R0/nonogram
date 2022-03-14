@@ -78,6 +78,14 @@ class Board {
   get cols() {
     return this.#cols;
   }
+
+  toggleTileOpen(x, y) {
+    this.#grid[y][x].toggleOpen();
+  }
+
+  toggleTileFlag(x, y) {
+    this.#grid[y][x].toggleFlag();
+  }
 }
 
 module.exports = Board;

@@ -1,8 +1,10 @@
+import { Tile } from "./tile"
+
 type TruthyOrFalsy = number | boolean
 
 class Board {
   /** The grid layout for the board */
-  private #grid: TruthyOrFalsy[][]
+  private #grid: Tile[][]
   /** The number groups for each row */
   private #rows: number[][]
   /** The number groups for each column */
@@ -15,9 +17,14 @@ class Board {
   constructor(grid: TruthyOrFalsy[][])
   
   /** The grid layout for the board */
-  private grid: () => TruthyOrFalsy[][]
+  grid: () => Tile[][]
   /** The number groups for each row */
-  private rows: () => number[][]
+  rows: () => number[][]
   /** The number groups for each column */
-  private cols: () => number[][]
+  cols: () => number[][]
+
+  /** Toggles whther or not a tile is opened */
+  toggleTileOpen(x: number, y: number): void
+  /** Toggles whther or not a tile is flagged */
+  toggleTileFlag(x: number, y: number): void
 }

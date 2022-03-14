@@ -22,4 +22,10 @@ class Tile {
   state: TileStateEnum
   /** Whether or not the tile is flagged */
   flag: TileFlaggedEnum
+
+  /** Toggles whther or not a tile is opened */
+  toggleOpen(): void
+  
+  /** Toggles whther or not a tile is flagged */
+  toggleFlag(): void
 }
