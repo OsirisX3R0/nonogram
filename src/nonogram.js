@@ -22,12 +22,11 @@ class Board {
    * @param {Object[][]} grid 2-dimensional grid of 1s and 0s to notate filled and empty squares, respectively
    */
   constructor(grid) {
-    let rowCount = 0;
-
     this.grid = grid.map((row, y) =>
       row.map((tile, x) => new Tile(tile, x, y))
     );
 
+    let rowCount = 0;
     this.rowNumbers = grid.reduce(
       (rows, row) => [
         ...rows,
@@ -57,21 +56,40 @@ class Board {
       []
     );
 
-    this.colNumbers = grid.reduce((rows, row, rowIndex) => {
-      return row.reduce((tiles, tile, tileIndex) => {
-        let updatedTiles = [];
+    let colCount = grid[0].map((_) => 0);
+    this.colNumbers = grid[0].map((_) => []);
+    for (let rowIndex = 0; rowIndex < grid.length; rowIndex++) {
+      let updated = [];
+      let row = grid[rowIndex];
 
-        if (!tiles[tileIndex]) {
-          return [...tiles, tile ? 1 : 0];
+      for (let tileIndex = 0; tileIndex < row.length; tileIndex++) {
+        let tile = row[tileIndex];
+
+        if (!tile) {
+          let finished = colCount[tileIndex];
+          colCount[tileIndex] = 0;
+          if (finished) {
+            this.colNumbers[tileIndex] = [
+              ...this.colNumbers[tileIndex],
+              finished,
+            ];
+          }
         } else {
-          updatedTiles = tiles.map((x, i) =>
-            i === tiles[tileIndex] ? (tile ? x++ : x) : x
-          );
-        }
+          colCount[tileIndex]++;
+          // If it's the last tile in the row, save the current count
+          if (rowIndex === grid.length - 1) {
+            let finished = colCount[tileIndex];
+            colCount[tileIndex] = 0;
+            this.colNumbers[tileIndex] = [
+              ...this.colNumbers[tileIndex],
+              finished,
+            ];
+          }
 
-        return updatedTiles;
-      }, []);
-    }, []);
+          // return tiles;
+        }
+      }
+    }
   }
 }
 
