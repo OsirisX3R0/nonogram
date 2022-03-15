@@ -28,3 +28,5 @@ class Board {
   /** Toggles whther or not a tile is flagged */
   toggleTileFlag(x: number, y: number): void
 }
+
+export default Board

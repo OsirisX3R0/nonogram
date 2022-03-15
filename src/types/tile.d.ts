@@ -29,3 +29,5 @@ class Tile {
   /** Toggles whther or not a tile is flagged */
   toggleFlag(): void
 }
+
+export default Tile
