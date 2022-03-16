@@ -11,29 +11,50 @@ class Board {
     );
 
     let rowCount = 0;
-    this.#rows = grid.reduce(
+    this.#rows = this.#grid.reduce(
       (rows, row) => [
         ...rows,
         // Check each tile in each row in the grid
-        row.reduce((tiles, tile, tileIndex) => {
+        row.reduce((groups, tile, tileIndex) => {
           // If falsey...
-          if (!tile) {
+          if (!tile.filled) {
             // Either save the current count or continue on if it is 0
-            let finished = rowCount;
+            let count = rowCount;
             rowCount = 0;
-            return finished ? [...tiles, finished] : tiles;
+            return count
+              ? groups.length
+                ? groups.map((group, i) => {
+                    return i === groups.length - 1
+                      ? { ...group, count }
+                      : group;
+                  })
+                : [{ count: 0, tiles: [tile] }] //[...groups, finished]
+              : groups;
             // If truthy...
           } else {
             // Iterate the count
             rowCount++;
             // If it's the last tile in the row, save the current count
             if (tileIndex === row.length - 1) {
-              let finished = rowCount;
+              let count = rowCount;
               rowCount = 0;
-              return [...tiles, finished];
+              return groups.length
+                ? groups.map((group, i) => {
+                    return i === groups.length - 1
+                      ? { count, tiles: [...group.tiles, tile] }
+                      : group;
+                  })
+                : [{ count: 0, tiles: [tile] }]; //[...groups, finished];
             }
 
-            return tiles;
+            return groups.length
+              ? groups.map((group, i) => {
+                  return i === groups.length - 1
+                    ? { ...group, tiles: [...group.tiles, tile] }
+                    : group;
+                })
+              : [{ count: 0, tiles: [tile] }];
+            //tiles.length ? [...tiles, ] : [{count: 0, tiles: [tile]}];
           }
         }, []),
       ],
