@@ -1,4 +1,5 @@
 const Tile = require("./tile");
+const TileGroup = require("./tile-group");
 
 class Board {
   #grid = [];
@@ -25,13 +26,16 @@ class Board {
               ? groups.length
                 ? groups.map((group, i) => {
                     return i === groups.length - 1
-                      ? { ...group, count }
+                      ? new TileGroup({ ...group, count })
                       : group;
                   })
-                : [{ count: 0, tiles: [tile] }] //[...groups, finished]
+                : [{ count, tiles: [tile] }]
               : groups;
             // If truthy...
           } else {
+            if (groups.length && groups[groups.length - 1].count) {
+              groups = [...groups, { count: 0, tiles: [] }];
+            }
             // Iterate the count
             rowCount++;
             // If it's the last tile in the row, save the current count
@@ -41,10 +45,10 @@ class Board {
               return groups.length
                 ? groups.map((group, i) => {
                     return i === groups.length - 1
-                      ? { count, tiles: [...group.tiles, tile] }
+                      ? new TileGroup({ count, tiles: [...group.tiles, tile] })
                       : group;
                   })
-                : [{ count: 0, tiles: [tile] }]; //[...groups, finished];
+                : [{ count: 0, tiles: [tile] }];
             }
 
             return groups.length
@@ -54,38 +58,52 @@ class Board {
                     : group;
                 })
               : [{ count: 0, tiles: [tile] }];
-            //tiles.length ? [...tiles, ] : [{count: 0, tiles: [tile]}];
           }
         }, []),
       ],
       []
     );
 
-    let colCount = grid[0].map((_) => 0);
-    this.#cols = grid[0].map((_) => []);
+    let colCount = this.#grid[0].map((_) => 0);
+    let cols = this.#grid[0].map((_) => []);
     for (let rowIndex = 0; rowIndex < grid.length; rowIndex++) {
-      let row = grid[rowIndex];
+      let row = this.#grid[rowIndex];
 
       for (let tileIndex = 0; tileIndex < row.length; tileIndex++) {
         let tile = row[tileIndex];
 
-        if (!tile) {
-          let finished = colCount[tileIndex];
+        if (!tile.filled) {
+          let count = colCount[tileIndex];
           colCount[tileIndex] = 0;
-          if (finished) {
-            this.cols[tileIndex] = [...this.cols[tileIndex], finished];
+          if (count) {
+            cols[tileIndex] = [
+              ...cols[tileIndex],
+              { count, tiles: cols[tileIndex][cols[tileIndex].length - 1] },
+            ];
           }
         } else {
+          if (
+            cols[tileIndex].length &&
+            cols[tileIndex][cols.length - 1].count
+          ) {
+            cols[tileIndex] = [...cols[tileIndex], { count: 0, tiles: [] }];
+          }
+
           colCount[tileIndex]++;
           // If it's the last tile in the row, save the current count
           if (rowIndex === grid.length - 1) {
-            let finished = colCount[tileIndex];
+            let count = colCount[tileIndex];
             colCount[tileIndex] = 0;
-            this.cols[tileIndex] = [...this.cols[tileIndex], finished];
+            cols[tileIndex] = [
+              ...cols[tileIndex],
+              { count, tiles: cols[tileIndex][cols[tileIndex].length - 1] },
+            ];
           }
         }
       }
     }
+
+    this.#cols = cols;
   }
 
   get grid() {
