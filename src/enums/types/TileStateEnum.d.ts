@@ -1,6 +1,8 @@
 enum TileStateEnum {
-  /** The tile has been opened */
-  OPEN,
   /** The tile is not yet opened */
-  CLOSED
+  CLOSED,
+  /** The tile has been opened */
+  OPEN
 }
+
+export default TileStateEnum

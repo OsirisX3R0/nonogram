@@ -1,4 +1,4 @@
 module.exports = {
-  OPEN: 0,
-  CLOSED: 1,
+  CLOSED: 0,
+  OPEN: 1,
 };

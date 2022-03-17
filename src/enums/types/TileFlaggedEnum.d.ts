@@ -4,3 +4,5 @@ enum TileFlaggedEnum {
   /** The tile is flagged */
   FLAGGED
 }
+
+export default TileFlaggedEnum
