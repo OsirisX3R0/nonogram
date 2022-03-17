@@ -29,7 +29,7 @@ class Board {
                       ? new TileGroup({ ...group, count })
                       : group;
                   })
-                : [{ count, tiles: [tile] }]
+                : [new TileGroup({ count, tiles: [tile] })]
               : groups;
             // If truthy...
           } else {
@@ -76,15 +76,18 @@ class Board {
           let count = colCount[tileIndex];
           colCount[tileIndex] = 0;
           if (count) {
-            cols[tileIndex] = [
-              ...cols[tileIndex],
-              { count, tiles: cols[tileIndex][cols[tileIndex].length - 1] },
-            ];
+            cols[tileIndex] = cols[tileIndex].length
+              ? cols[tileIndex].map((group, i) => {
+                  return i === cols[tileIndex].length - 1
+                    ? new TileGroup({ ...group, count })
+                    : group;
+                })
+              : [new TileGroup({ count, tiles: [tile] })];
           }
         } else {
           if (
             cols[tileIndex].length &&
-            cols[tileIndex][cols.length - 1].count
+            cols[tileIndex][cols[tileIndex].length - 1].count
           ) {
             cols[tileIndex] = [...cols[tileIndex], { count: 0, tiles: [] }];
           }
@@ -94,10 +97,21 @@ class Board {
           if (rowIndex === grid.length - 1) {
             let count = colCount[tileIndex];
             colCount[tileIndex] = 0;
-            cols[tileIndex] = [
-              ...cols[tileIndex],
-              { count, tiles: cols[tileIndex][cols[tileIndex].length - 1] },
-            ];
+            cols[tileIndex] = cols[tileIndex].length
+              ? cols[tileIndex].map((group, i) => {
+                  return i === cols[tileIndex].length - 1
+                    ? new TileGroup({ count, tiles: [...group.tiles, tile] })
+                    : group;
+                })
+              : [new TileGroup({ count, tiles: [tile] })];
+          } else {
+            cols[tileIndex] = cols[tileIndex].length
+              ? cols[tileIndex].map((group, i) => {
+                  return i === cols[tileIndex].length - 1
+                    ? new TileGroup({ ...group, tiles: [...group.tiles, tile] })
+                    : group;
+                })
+              : [{ count: 0, tiles: [tile] }];
           }
         }
       }
