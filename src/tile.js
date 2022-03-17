@@ -35,13 +35,13 @@ class Tile {
   }
 
   toggleOpen() {
-    this.state === TileStateEnum.CLOSED
+    this.#state = this.#state === TileStateEnum.CLOSED
       ? TileStateEnum.OPEN
       : TileStateEnum.CLOSED;
   }
 
   toggleFlag() {
-    this.flag === TileFlaggedEnum.UNFLAGGED
+    this.#flag = this.#flag === TileFlaggedEnum.UNFLAGGED
       ? TileFlaggedEnum.FLAGGED
       : TileFlaggedEnum.UNFLAGGED;
   }
