@@ -6,6 +6,14 @@ class Board {
   #rows = [];
   #cols = [];
 
+  #toggleTileOpen(x, y) {
+    this.#grid[y][x].toggleOpen();
+  }
+
+  #toggleTileFlag(x, y) {
+    this.#grid[y][x].toggleFlag();
+  }
+
   constructor(grid) {
     this.#grid = grid.map((row, y) =>
       row.map((tile, x) => new Tile(tile, x, y))
@@ -66,11 +74,11 @@ class Board {
 
     let colCount = this.#grid[0].map((_) => 0);
     let cols = this.#grid[0].map((_) => []);
-    for (let rowIndex = 0; rowIndex < grid.length; rowIndex++) {
-      let row = this.#grid[rowIndex];
+    for (let [rowIndex, row] of this.#grid.entries()) {
+      // let row = this.#grid[rowIndex];
 
-      for (let tileIndex = 0; tileIndex < row.length; tileIndex++) {
-        let tile = row[tileIndex];
+      for (let [tileIndex, tile] of row.entries()) {
+        // let tile = row[tileIndex];
 
         if (!tile.filled) {
           let count = colCount[tileIndex];
@@ -132,12 +140,16 @@ class Board {
     return this.#cols;
   }
 
-  toggleTileOpen(x, y) {
-    this.#grid[y][x].toggleOpen();
+  toggleTileOpenRange(tiles) {
+    for (let tile of tiles) {
+      this.#toggleTileOpen(tile.x, tile.y);
+    }
   }
 
-  toggleTileFlag(x, y) {
-    this.#grid[y][x].toggleFlag();
+  toggleTileFlagRange(tiles) {
+    for (let tile of tiles) {
+      this.#toggleTileFlag(tile.x, tile.y);
+    }
   }
 }
 

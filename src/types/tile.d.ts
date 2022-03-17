@@ -1,8 +1,10 @@
 import TileFlaggedEnum from "./enums/TileFlaggedEnum";
 import TileStateEnum from "./enums/TileStateEnum";
 
+/** A truthy or falsy value, meant to be numeric (1 | 0) or boolean (true | false) */
 type TruthyOrFalsy = number | boolean
 
+/** Each single tile of the nonogram puzzle */
 class Tile {  
 
   /** Horizontal position of the tile */
@@ -15,6 +17,7 @@ class Tile {
   private #state: TileStateEnum
   /** Whether or not the tile is flagged */
   private #flag: TileFlaggedEnum
+
   /**
    * Creates a new `Tile` instance
    * @param value Truthy/falsy value indicating whether or not the tile is filled
