@@ -29,11 +29,65 @@ class Board {
   #toggleTileOpen(x, y) {
     this.#grid[y][x].toggleOpen();
 
+    for (let rowSet in this.#rows) {
+      for (let rowGroup in rowSet) {
+        for (let rowTile in rowGroup) {
+          if (rowTile.x === x && rowTile.y === y) rowTile.toggleOpen();
+        }
+
+        if (rowGroup.every((tile) => tile.state === TileStateEnum.OPEN)) {
+          for (let tile in this.#grid[y]) {
+            if (!tile.filled && tile.flagged === TileFlaggedEnum.UNFLAGGED) {
+              tile.toggleFlag();
+            }
+          }
+        }
+      }
+    }
+
+    for (let colSet in this.#cols) {
+      for (let colGroup in colSet) {
+        for (let colTile in colGroup) {
+          if (colTile.x === x && colTile.y === y) colTile.toggleOpen();
+        }
+
+        if (colGroup.every((tile) => tile.state === TileStateEnum.OPEN)) {
+          for (let row in this.#grid) {
+            for (let tile in row) {
+              if (
+                tile.x === x &&
+                !tile.filled &&
+                tile.flagged === TileFlaggedEnum.UNFLAGGED
+              ) {
+                tile.toggleFlag();
+              }
+            }
+          }
+        }
+      }
+    }
+
     this.#refreshState();
   }
 
   #toggleTileFlag(x, y) {
     this.#grid[y][x].toggleFlag();
+
+    for (let rowSet in this.#rows) {
+      for (let rowGroup in rowSet) {
+        for (let rowTile in rowGroup) {
+          if (rowTile.x === x && rowTile.y === y) rowTile.toggleFlag();
+        }
+      }
+    }
+
+    for (let colSet in this.#cols) {
+      for (let colGroup in colSet) {
+        for (let colTile in colGroup) {
+          if (colTile.x === x && colTile.y === y) colTile.toggleFlag();
+        }
+      }
+    }
 
     this.#refreshState();
   }
