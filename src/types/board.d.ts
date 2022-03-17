@@ -1,3 +1,4 @@
+import BoardStateEnum from "../enums/types/BoardStateEnum"
 import { Tile } from "./tile"
 import { TileGroup } from "./tile-group"
 
@@ -17,6 +18,15 @@ class Board {
   private #rows: TileGroup[][]
   /** The number groups for each column */
   private #cols: TileGroup[][]
+  /** The current status of the board */
+  private #state: BoardStateEnum
+
+  private #refreshState: () => void
+  /** Toggles whether or not a tile is opened */
+  private #toggleTileOpen(x: number, y: number): void
+
+  /** Toggles whether or not a tile is flagged */
+  private #toggleTileFlag(x: number, y: number): void
 
   /**
    * Creates a new `Board` instance
@@ -30,13 +40,11 @@ class Board {
   rows: () => TileGroup[][]
   /** The number groups for each column */
   cols: () => TileGroup[][]
+  /** The current status of the board */
+  state: () => BoardStateEnum
 
-  /** Toggles whether or not a tile is opened */
-  private toggleTileOpen(x: number, y: number): void
   /** Toggles whether or not a range of tiles is opened */
   toggleTileOpenRange(range: Coords[]): void
-  /** Toggles whether or not a tile is flagged */
-  private toggleTileFlag(x: number, y: number): void
   /** Toggles whether or not a range of tiles is flagged */
   toggleTileFlagRange(range: Coords[]): void
 }

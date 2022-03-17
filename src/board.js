@@ -1,3 +1,6 @@
+const BoardStateEnum = require("./enums/BoardStateEnum");
+const TileFlaggedEnum = require("./enums/TileFlaggedEnum");
+const TileStateEnum = require("./enums/TileStateEnum");
 const Tile = require("./tile");
 const TileGroup = require("./tile-group");
 
@@ -5,13 +8,34 @@ class Board {
   #grid = [];
   #rows = [];
   #cols = [];
+  #state = BoardStateEnum.GENERATING;
+
+  get #allTilesOpened() {
+    let opened = this.#grid.every((row) =>
+      row.every((tile) => tile.state === TileStateEnum.OPEN)
+    );
+
+    return opened;
+  }
+
+  #refreshState() {
+    if (this.#allTilesOpened) {
+      this.#state = BoardStateEnum.COMPLETE;
+    } else {
+      this.#state = BoardStateEnum.STARTED;
+    }
+  }
 
   #toggleTileOpen(x, y) {
     this.#grid[y][x].toggleOpen();
+
+    this.#refreshState();
   }
 
   #toggleTileFlag(x, y) {
     this.#grid[y][x].toggleFlag();
+
+    this.#refreshState();
   }
 
   constructor(grid) {
@@ -126,6 +150,8 @@ class Board {
     }
 
     this.#cols = cols;
+
+    this.#state = BoardStateEnum.GENERATED;
   }
 
   get grid() {
@@ -138,6 +164,10 @@ class Board {
 
   get cols() {
     return this.#cols;
+  }
+
+  get state() {
+    return this.#state;
   }
 
   toggleTileOpenRange(tiles) {
