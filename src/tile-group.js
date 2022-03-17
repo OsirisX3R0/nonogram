@@ -14,10 +14,6 @@ class TileGroup {
   get tiles() {
     return this.#tiles;
   }
-
-  // addTile(tile) {
-  //   this.#tiles.push(tile);
-  // }
 }
 
 module.exports = TileGroup;

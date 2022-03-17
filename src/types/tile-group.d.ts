@@ -13,6 +13,4 @@ class TileGroup {
 
   count: () => number
   tiles: () => Tile[]
-
-  // addTile(tile: Tile): void
 }
