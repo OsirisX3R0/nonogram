@@ -9,96 +9,120 @@ class Board {
   #rows = [];
   #cols = [];
   #state = BoardStateEnum.GENERATING;
+  #lives = 0;
 
   get #allTilesOpened() {
+    // Every filled tile has been opened and every empty tile has been flagged
     return this.#grid.every((row) =>
-      row.every((tile) => tile.state === TileStateEnum.OPEN)
+      row.every(
+        (tile) =>
+          (tile.filled && tile.state === TileStateEnum.OPEN) ||
+          (!tile.filled && tile.flag === TileFlaggedEnum.FLAGGED)
+      )
     );
   }
 
   #refreshState() {
-    if (this.#allTilesOpened) {
+    // If no lives remain, FAILED
+    if (this.#lives <= 0) {
+      this.#state = BoardStateEnum.FAILED;
+      // If all tiles are opened/flagged, COMPLETE
+    } else if (this.#allTilesOpened) {
       this.#state = BoardStateEnum.COMPLETE;
+      // Otherwise, STARTED (default)
     } else {
       this.#state = BoardStateEnum.STARTED;
     }
   }
 
   #toggleTileOpen(x, y) {
-    // Open the tile
-    this.#grid[y][x].toggleOpen();
+    if (this.#state !== BoardStateEnum.GENERATING) {
+      // Open the tile
+      this.#grid[y][x].toggleOpen();
 
-    for (let rowSet in this.#rows) {
-      for (let rowGroup in rowSet) {
-        for (let rowTile in rowGroup) {
-          // Find any matches in row groups and open them as well
-          if (rowTile.x === x && rowTile.y === y) rowTile.toggleOpen();
-        }
-
-        // If all tiles in all of the row group are opened, flag the rest of the row
-        if (rowGroup.every((tile) => tile.state === TileStateEnum.OPEN)) {
-          for (let tile in this.#grid[y]) {
-            if (!tile.filled && tile.flagged === TileFlaggedEnum.UNFLAGGED) {
-              tile.toggleFlag();
-            }
-          }
-        }
+      // If the tile was marked wrong, deduct a life and return false
+      if (this.#grid[y][x].wrong) {
+        this.#lives -= 1;
+        return false;
       }
-    }
 
-    for (let colSet in this.#cols) {
-      for (let colGroup in colSet) {
-        for (let colTile in colGroup) {
-          // Find any matches in column groups and open them as well
-          if (colTile.x === x && colTile.y === y) colTile.toggleOpen();
-        }
+      for (let rowSet of this.#rows) {
+        for (let rowGroup of rowSet) {
+          for (let rowTile of rowGroup.tiles) {
+            // Find any matches in row groups and open them as well
+            if (rowTile.x === x && rowTile.y === y) rowTile.toggleOpen();
+          }
 
-        // If all tiles in all of the column group are opened, flag the rest of the column
-        if (colGroup.every((tile) => tile.state === TileStateEnum.OPEN)) {
-          for (let row in this.#grid) {
-            for (let tile in row) {
-              if (
-                tile.x === x &&
-                !tile.filled &&
-                tile.flagged === TileFlaggedEnum.UNFLAGGED
-              ) {
+          // If all tiles in all of the row group are opened, flag the rest of the row
+          if (
+            rowGroup.tiles.every((tile) => tile.state === TileStateEnum.OPEN)
+          ) {
+            for (let tile of this.#grid[y]) {
+              if (!tile.filled && tile.flagged === TileFlaggedEnum.UNFLAGGED) {
                 tile.toggleFlag();
               }
             }
           }
         }
       }
-    }
 
-    this.#refreshState();
+      for (let colSet of this.#cols) {
+        for (let colGroup of colSet) {
+          for (let colTile of colGroup.tiles) {
+            // Find any matches in column groups and open them as well
+            if (colTile.x === x && colTile.y === y) colTile.toggleOpen();
+          }
+
+          // If all tiles in all of the column group are opened, flag the rest of the column
+          if (
+            colGroup.tiles.every((tile) => tile.state === TileStateEnum.OPEN)
+          ) {
+            for (let row of this.#grid) {
+              for (let tile of row) {
+                if (
+                  tile.x === x &&
+                  !tile.filled &&
+                  tile.flagged === TileFlaggedEnum.UNFLAGGED
+                ) {
+                  tile.toggleFlag();
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // Return true when everything goes as planned
+      return true;
+    }
   }
 
   #toggleTileFlag(x, y) {
-    // Flag the tile
-    this.#grid[y][x].toggleFlag();
+    if (this.#state !== BoardStateEnum.GENERATING) {
+      // Flag the tile
+      this.#grid[y][x].toggleFlag();
 
-    // Find any matches in row groups and flag them as well
-    for (let rowSet in this.#rows) {
-      for (let rowGroup in rowSet) {
-        for (let rowTile in rowGroup) {
-          if (rowTile.x === x && rowTile.y === y) rowTile.toggleFlag();
+      // Find any matches in row groups and flag them as well
+      for (let rowSet of this.#rows) {
+        for (let rowGroup of rowSet) {
+          for (let rowTile of rowGroup) {
+            if (rowTile.x === x && rowTile.y === y) rowTile.toggleFlag();
+          }
+        }
+      }
+
+      // Find any matches in column groups and flag them as well
+      for (let colSet of this.#cols) {
+        for (let colGroup of colSet) {
+          for (let colTile of colGroup) {
+            if (colTile.x === x && colTile.y === y) colTile.toggleFlag();
+          }
         }
       }
     }
-
-    // Find any matches in column groups and flag them as well
-    for (let colSet in this.#cols) {
-      for (let colGroup in colSet) {
-        for (let colTile in colGroup) {
-          if (colTile.x === x && colTile.y === y) colTile.toggleFlag();
-        }
-      }
-    }
-
-    this.#refreshState();
   }
 
-  constructor(grid) {
+  constructor(grid, opts = {}) {
     // Create the `Tiles` from the passed-in grid
     this.#grid = grid.map((row, y) =>
       row.map((tile, x) => new Tile(tile, x, y))
@@ -218,6 +242,8 @@ class Board {
 
     this.#cols = cols;
 
+    this.#lives = opts.lives;
+
     this.#state = BoardStateEnum.GENERATED;
   }
 
@@ -237,16 +263,26 @@ class Board {
     return this.#state;
   }
 
-  toggleTileOpenRange(tiles) {
-    for (let tile of tiles) {
-      this.#toggleTileOpen(tile.x, tile.y);
-    }
+  get lives() {
+    return this.#lives;
   }
 
-  toggleTileFlagRange(tiles) {
+  toggleTileOpenMany(tiles) {
+    let cont = true;
+    for (let tile of tiles) {
+      // Opening many stops when a wrong tile is detected
+      if (cont) cont = this.#toggleTileOpen(tile.x, tile.y);
+    }
+
+    this.#refreshState();
+  }
+
+  toggleTileFlagMany(tiles) {
     for (let tile of tiles) {
       this.#toggleTileFlag(tile.x, tile.y);
     }
+
+    this.#refreshState();
   }
 }
 

@@ -13,6 +13,8 @@ class Tile {
   private #y: number
   /** Whether or not the tile is filled */
   private #filled: boolean
+  /** Whether or not the tile has been marked wrong */
+  private #wrong: boolean
   /** Whether or not the tile is opened */
   private #state: TileStateEnum
   /** Whether or not the tile is flagged */
@@ -32,6 +34,8 @@ class Tile {
   y: () => number
   /** Whether or not the tile is filled */
   filled: () => boolean
+  /** Whether or not the tile has been marked wrong */
+  private wrong: () => boolean
   /** Whether or not the tile is opened */
   state: () => TileStateEnum
   /** Whether or not the tile is flagged */

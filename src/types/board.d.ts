@@ -10,6 +10,10 @@ type Coords = {
   y: number
 }
 
+type BoardOptions = {
+  lives: number
+}
+
 /** The board on which the nonogram puzzle is set up and solved */
 class Board {
   /** The grid layout for the board */
@@ -21,12 +25,12 @@ class Board {
   /** The current status of the board */
   private #state: BoardStateEnum
 
-  /** Whether or not all tiles have been opened */
+  /** Whether or not all filled tiles have been opened and empty tiles have been flagged */
   private #allTilesOpened: () => boolean
   /** Updates the current state */
   private #refreshState: () => void
   /** Toggles whether or not a tile is opened */
-  private #toggleTileOpen(x: number, y: number): void
+  private #toggleTileOpen(x: number, y: number): boolean
 
   /** Toggles whether or not a tile is flagged */
   private #toggleTileFlag(x: number, y: number): void
@@ -34,8 +38,9 @@ class Board {
   /**
    * Creates a new `Board` instance
    * @param {Object[][]} grid 2-dimensional grid of truthy and falsy values to notate filled and empty squares, respectively
+   * @param {BoardOptions} opts Additional options for the board
    */
-  constructor(grid: TruthyOrFalsy[][])
+  constructor(grid: TruthyOrFalsy[][], opts: BoardOptions)
   
   /** The grid layout for the board */
   grid: () => Tile[][]
@@ -47,9 +52,9 @@ class Board {
   state: () => BoardStateEnum
 
   /** Toggles whether or not a range of tiles is opened */
-  toggleTileOpenRange(range: Coords[]): void
+  toggleTileOpenMany(range: Coords[]): void
   /** Toggles whether or not a range of tiles is flagged */
-  toggleTileFlagRange(range: Coords[]): void
+  toggleTileFlagMany(range: Coords[]): void
 }
 
 export default Board
