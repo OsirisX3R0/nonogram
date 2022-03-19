@@ -11,11 +11,9 @@ class Board {
   #state = BoardStateEnum.GENERATING;
 
   get #allTilesOpened() {
-    let opened = this.#grid.every((row) =>
+    return this.#grid.every((row) =>
       row.every((tile) => tile.state === TileStateEnum.OPEN)
     );
-
-    return opened;
   }
 
   #refreshState() {
@@ -27,14 +25,17 @@ class Board {
   }
 
   #toggleTileOpen(x, y) {
+    // Open the tile
     this.#grid[y][x].toggleOpen();
 
     for (let rowSet in this.#rows) {
       for (let rowGroup in rowSet) {
         for (let rowTile in rowGroup) {
+          // Find any matches in row groups and open them as well
           if (rowTile.x === x && rowTile.y === y) rowTile.toggleOpen();
         }
 
+        // If all tiles in all of the row group are opened, flag the rest of the row
         if (rowGroup.every((tile) => tile.state === TileStateEnum.OPEN)) {
           for (let tile in this.#grid[y]) {
             if (!tile.filled && tile.flagged === TileFlaggedEnum.UNFLAGGED) {
@@ -48,9 +49,11 @@ class Board {
     for (let colSet in this.#cols) {
       for (let colGroup in colSet) {
         for (let colTile in colGroup) {
+          // Find any matches in column groups and open them as well
           if (colTile.x === x && colTile.y === y) colTile.toggleOpen();
         }
 
+        // If all tiles in all of the column group are opened, flag the rest of the column
         if (colGroup.every((tile) => tile.state === TileStateEnum.OPEN)) {
           for (let row in this.#grid) {
             for (let tile in row) {
@@ -71,8 +74,10 @@ class Board {
   }
 
   #toggleTileFlag(x, y) {
+    // Flag the tile
     this.#grid[y][x].toggleFlag();
 
+    // Find any matches in row groups and flag them as well
     for (let rowSet in this.#rows) {
       for (let rowGroup in rowSet) {
         for (let rowTile in rowGroup) {
@@ -81,6 +86,7 @@ class Board {
       }
     }
 
+    // Find any matches in column groups and flag them as well
     for (let colSet in this.#cols) {
       for (let colGroup in colSet) {
         for (let colTile in colGroup) {
@@ -93,10 +99,12 @@ class Board {
   }
 
   constructor(grid) {
+    // Create the `Tiles` from the passed-in grid
     this.#grid = grid.map((row, y) =>
       row.map((tile, x) => new Tile(tile, x, y))
     );
 
+    // Counter for each row (reset after each, by design)
     let rowCount = 0;
     this.#rows = this.#grid.reduce(
       (rows, row) => [
@@ -119,6 +127,7 @@ class Board {
               : groups;
             // If truthy...
           } else {
+            // If the last group is already completed, add an empty one
             if (groups.length && groups[groups.length - 1].count) {
               groups = [...groups, { count: 0, tiles: [] }];
             }
@@ -150,15 +159,16 @@ class Board {
       []
     );
 
+    // Array of counters for columns
     let colCount = this.#grid[0].map((_) => 0);
+    // Array of empty arrays to create column groups
     let cols = this.#grid[0].map((_) => []);
+    // Check each tile in each row in the grid
     for (let [rowIndex, row] of this.#grid.entries()) {
-      // let row = this.#grid[rowIndex];
-
       for (let [tileIndex, tile] of row.entries()) {
-        // let tile = row[tileIndex];
-
+        // If falsey...
         if (!tile.filled) {
+          // Either save the current column count or skip ahead
           let count = colCount[tileIndex];
           colCount[tileIndex] = 0;
           if (count) {
@@ -170,7 +180,9 @@ class Board {
                 })
               : [new TileGroup({ count, tiles: [tile] })];
           }
+          // If truthy...
         } else {
+          // If the last group is already completed, add an empty one
           if (
             cols[tileIndex].length &&
             cols[tileIndex][cols[tileIndex].length - 1].count
@@ -178,8 +190,9 @@ class Board {
             cols[tileIndex] = [...cols[tileIndex], { count: 0, tiles: [] }];
           }
 
+          // Iterate the count
           colCount[tileIndex]++;
-          // If it's the last tile in the row, save the current count
+          // If it's the last row in the grid, save the current count
           if (rowIndex === grid.length - 1) {
             let count = colCount[tileIndex];
             colCount[tileIndex] = 0;

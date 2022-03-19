@@ -21,6 +21,9 @@ class Board {
   /** The current status of the board */
   private #state: BoardStateEnum
 
+  /** Whether or not all tiles have been opened */
+  private #allTilesOpened: () => boolean
+  /** Updates the current state */
   private #refreshState: () => void
   /** Toggles whether or not a tile is opened */
   private #toggleTileOpen(x: number, y: number): void

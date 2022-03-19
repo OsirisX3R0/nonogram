@@ -14,6 +14,10 @@ class TileGroup {
   get tiles() {
     return this.#tiles;
   }
+
+  get allTilesOpened() {
+    return this.#tiles.every((tile) => tile.state === TileStateEnum.OPEN);
+  }
 }
 
 module.exports = TileGroup;

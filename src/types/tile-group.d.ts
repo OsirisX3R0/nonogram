@@ -23,4 +23,6 @@ class TileGroup {
   count: () => number
   /** The tiles included in the group */
   tiles: () => Tile[]
+  /** Whether or not all tiles have been opened */
+  allTilesOpened: () => boolean
 }
