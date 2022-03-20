@@ -52,9 +52,9 @@ class Board {
   state: () => BoardStateEnum
 
   /** Toggles whether or not a range of tiles is opened */
-  toggleTileOpenMany(range: Coords[]): void
+  toggleOpenMany(range: Tile[]): void
   /** Toggles whether or not a range of tiles is flagged */
-  toggleTileFlagMany(range: Coords[]): void
+  toggleFlagMany(range: Tile[]): void
 }
 
 export default Board

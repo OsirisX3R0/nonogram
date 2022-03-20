@@ -124,13 +124,11 @@ class Board {
 
   constructor(grid, opts = {}) {
     // Create the `Tiles` from the passed-in grid
-    this.#grid = grid.map((row, y) =>
-      row.map((tile, x) => new Tile(tile, x, y))
-    );
+    grid = grid.map((row, y) => row.map((tile, x) => new Tile(tile, x, y)));
 
     // Counter for each row (reset after each, by design)
     let rowCount = 0;
-    this.#rows = this.#grid.reduce(
+    let rows = grid.reduce(
       (rows, row) => [
         ...rows,
         // Check each tile in each row in the grid
@@ -184,11 +182,11 @@ class Board {
     );
 
     // Array of counters for columns
-    let colCount = this.#grid[0].map((_) => 0);
+    let colCount = grid[0].map((_) => 0);
     // Array of empty arrays to create column groups
-    let cols = this.#grid[0].map((_) => []);
+    let cols = grid[0].map((_) => []);
     // Check each tile in each row in the grid
-    for (let [rowIndex, row] of this.#grid.entries()) {
+    for (let [rowIndex, row] of grid.entries()) {
       for (let [tileIndex, tile] of row.entries()) {
         // If falsey...
         if (!tile.filled) {
@@ -240,6 +238,28 @@ class Board {
       }
     }
 
+    // If a row has no groups, flag all tiles
+    for (let [i, rowSet] of rows.entries()) {
+      if (!rowSet.length) {
+        for (let tile of rowSet[i]) {
+          tile.toggleFlag();
+        }
+      }
+    }
+
+    // If a column has no groups, flag all tiles
+    for (let [i, colSet] of cols.entries()) {
+      if (!colSet.length) {
+        for (let row of grid) {
+          row[i].toggleFlag();
+        }
+      }
+    }
+
+    this.#grid = grid;
+
+    this.#rows = rows;
+
     this.#cols = cols;
 
     this.#lives = opts.lives;
@@ -267,7 +287,7 @@ class Board {
     return this.#lives;
   }
 
-  toggleTileOpenMany(tiles) {
+  toggleOpenMany(tiles) {
     let cont = true;
     for (let tile of tiles) {
       // Opening many stops when a wrong tile is detected
@@ -277,7 +297,7 @@ class Board {
     this.#refreshState();
   }
 
-  toggleTileFlagMany(tiles) {
+  toggleFlagMany(tiles) {
     for (let tile of tiles) {
       this.#toggleTileFlag(tile.x, tile.y);
     }
