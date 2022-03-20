@@ -229,7 +229,7 @@ class Board {
             cols[tileIndex] = cols[tileIndex].length
               ? cols[tileIndex].map((group, i) => {
                   return i === cols[tileIndex].length - 1
-                    ? new TileGroup({ ...group, tiles: [...group.tiles, tile] })
+                    ? { ...group, tiles: [...group.tiles, tile] }
                     : group;
                 })
               : [{ count: 0, tiles: [tile] }];
