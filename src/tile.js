@@ -1,4 +1,3 @@
-const TileFlaggedEnum = require("./enums/TileFlaggedEnum");
 const TileStateEnum = require("./enums/TileStateEnum");
 
 class Tile {
@@ -7,7 +6,7 @@ class Tile {
   #filled = false;
   #wrong = false;
   #state = TileStateEnum.CLOSED;
-  #flag = TileFlaggedEnum.UNFLAGGED;
+  #flagged = false;
 
   constructor(value, x, y) {
     this.#x = x;
@@ -35,12 +34,12 @@ class Tile {
     return this.#state;
   }
 
-  get flag() {
-    return this.#flag;
+  get flagged() {
+    return this.#flagged;
   }
 
   toggleOpen() {
-    if (this.#flag === TileFlaggedEnum.UNFLAGGED) {
+    if (!this.#flagged) {
       // If the space is not filled, flag it and mark it as wrong
       if (!this.#filled) {
         this.toggleFlag();
@@ -57,10 +56,7 @@ class Tile {
   }
 
   toggleFlag() {
-    this.#flag =
-      this.#flag === TileFlaggedEnum.UNFLAGGED
-        ? TileFlaggedEnum.FLAGGED
-        : TileFlaggedEnum.UNFLAGGED;
+    this.#flagged = !this.#flagged;
   }
 }
 

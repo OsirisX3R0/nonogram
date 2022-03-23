@@ -1,5 +1,4 @@
 const BoardStateEnum = require("./enums/BoardStateEnum");
-const TileFlaggedEnum = require("./enums/TileFlaggedEnum");
 const TileStateEnum = require("./enums/TileStateEnum");
 const Tile = require("./tile");
 const TileGroup = require("./tile-group");
@@ -17,7 +16,7 @@ class Board {
       row.every(
         (tile) =>
           (tile.filled && tile.state === TileStateEnum.OPEN) ||
-          (!tile.filled && tile.flag === TileFlaggedEnum.FLAGGED)
+          (!tile.filled && tile.flagged)
       )
     );
   }
@@ -78,7 +77,7 @@ class Board {
             if (
               !tile.filled &&
               tile.state === TileStateEnum.CLOSED &&
-              tile.flag === TileFlaggedEnum.UNFLAGGED
+              !tile.flagged
             )
               tile.toggleFlag();
 

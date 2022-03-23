@@ -1,4 +1,3 @@
-import TileFlaggedEnum from "./enums/TileFlaggedEnum";
 import TileStateEnum from "./enums/TileStateEnum";
 
 /** A truthy or falsy value, meant to be numeric (1 | 0) or boolean (true | false) */
@@ -18,7 +17,7 @@ class Tile {
   /** Whether or not the tile is opened */
   private #state: TileStateEnum
   /** Whether or not the tile is flagged */
-  private #flag: TileFlaggedEnum
+  private #flagged: boolean
 
   /**
    * Creates a new `Tile` instance
@@ -39,7 +38,7 @@ class Tile {
   /** Whether or not the tile is opened */
   state: () => TileStateEnum
   /** Whether or not the tile is flagged */
-  flag: () => TileFlaggedEnum
+  flagged: () => boolean
 
   /** Toggles whther or not a tile is opened */
   toggleOpen(): void
