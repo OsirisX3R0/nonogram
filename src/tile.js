@@ -4,7 +4,6 @@ class Tile {
   #x = 0;
   #y = 0;
   #filled = false;
-  #wrong = false;
   #state = TileStateEnum.CLOSED;
   #flagged = false;
 
@@ -26,10 +25,6 @@ class Tile {
     return this.#filled;
   }
 
-  get wrong() {
-    return this.#wrong;
-  }
-
   get state() {
     return this.#state;
   }
@@ -43,7 +38,7 @@ class Tile {
       // If the space is not filled, flag it and mark it as wrong
       if (!this.#filled) {
         this.toggleFlag();
-        this.#wrong = true;
+        this.#state = TileStateEnum.WRONG
         return;
       }
 

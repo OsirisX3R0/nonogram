@@ -40,7 +40,7 @@ class Board {
       this.#grid[y][x].toggleOpen();
 
       // If the tile was marked wrong, deduct a life and return false
-      if (this.#grid[y][x].wrong) {
+      if (this.#grid[y][x].state === TileStateEnum.WRONG) {
         this.#lives -= 1;
         return false;
       }
