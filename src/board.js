@@ -46,49 +46,61 @@ class Board {
         return false;
       }
 
-      for (let rowSet of this.#rows) {
-        for (let rowGroup of rowSet) {
-          for (let rowTile of rowGroup.tiles) {
-            // Find any matches in row groups and open them as well
-            if (rowTile.x === x && rowTile.y === y) rowTile.toggleOpen();
-          }
+      this.#rows = this.#rows.map((set, setIndex) => {
+        return setIndex !== y
+          ? set
+          : set.map((group) => {
+              group.openTile(x, y);
 
-          // If all tiles in all of the row group are opened, flag the rest of the row
-          if (
-            rowGroup.tiles.every((tile) => tile.state === TileStateEnum.OPEN)
-          ) {
-            for (let tile of this.#grid[y]) {
-              if (!tile.filled && tile.flagged === TileFlaggedEnum.UNFLAGGED) {
-                tile.toggleFlag();
+              if (group.allTilesOpened) {
               }
-            }
-          }
+
+              return group;
+            });
+      });
+
+      this.#cols = this.#cols.map((set, setIndex) => {
+        return setIndex !== x
+          ? set
+          : set.map((group) => {
+              group.openTile(x, y);
+
+              if (group.allTilesOpened) {
+              }
+
+              return group;
+            });
+      });
+
+      for (let [setIndex, set] of this.#rows.entries()) {
+        if (setIndex === y && set.every((group) => group.allTilesOpened)) {
+          this.#grid[y] = this.#grid[y].map((tile) => {
+            if (
+              !tile.filled &&
+              tile.state === TileStateEnum.CLOSED &&
+              tile.flag === TileFlaggedEnum.UNFLAGGED
+            )
+              tile.toggleFlag();
+
+            return tile;
+          });
         }
       }
 
-      for (let colSet of this.#cols) {
-        for (let colGroup of colSet) {
-          for (let colTile of colGroup.tiles) {
-            // Find any matches in column groups and open them as well
-            if (colTile.x === x && colTile.y === y) colTile.toggleOpen();
-          }
+      for (let [setIndex, set] of this.#cols.entries()) {
+        if (setIndex === x && set.every((group) => group.allTilesOpened)) {
+          this.#grid = this.#grid.map((row) =>
+            row.map((tile) => {
+              if (
+                tile.x === x &&
+                !tile.filled &&
+                tile.state === TileStateEnum.CLOSED
+              )
+                tile.toggleFlag();
 
-          // If all tiles in all of the column group are opened, flag the rest of the column
-          if (
-            colGroup.tiles.every((tile) => tile.state === TileStateEnum.OPEN)
-          ) {
-            for (let row of this.#grid) {
-              for (let tile of row) {
-                if (
-                  tile.x === x &&
-                  !tile.filled &&
-                  tile.flagged === TileFlaggedEnum.UNFLAGGED
-                ) {
-                  tile.toggleFlag();
-                }
-              }
-            }
-          }
+              return tile;
+            })
+          );
         }
       }
 

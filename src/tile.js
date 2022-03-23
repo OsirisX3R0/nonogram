@@ -40,18 +40,20 @@ class Tile {
   }
 
   toggleOpen() {
-    // If the space is not filled, flag it and mark it as wrong
-    if (!this.#filled) {
-      this.toggleFlag();
-      this.#wrong = true;
-      return;
-    }
+    if (this.#flag === TileFlaggedEnum.UNFLAGGED) {
+      // If the space is not filled, flag it and mark it as wrong
+      if (!this.#filled) {
+        this.toggleFlag();
+        this.#wrong = true;
+        return;
+      }
 
-    // Otherwise, toggle it open/close
-    this.#state =
-      this.#state === TileStateEnum.CLOSED
-        ? TileStateEnum.OPEN
-        : TileStateEnum.CLOSED;
+      // Otherwise, toggle it open/close
+      this.#state =
+        this.#state === TileStateEnum.CLOSED
+          ? TileStateEnum.OPEN
+          : TileStateEnum.CLOSED;
+    }
   }
 
   toggleFlag() {

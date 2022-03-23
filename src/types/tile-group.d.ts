@@ -25,4 +25,11 @@ class TileGroup {
   tiles: () => Tile[]
   /** Whether or not all tiles have been opened */
   allTilesOpened: () => boolean
+
+  /**
+   * Opens a `Tile` in the `TileGroup`
+   * @param x column index of the `Tile` to open
+   * @param y row index of the `Tile` to open
+   */
+  openTile(x: number, y: number)
 }
