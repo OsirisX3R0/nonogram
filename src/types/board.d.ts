@@ -5,13 +5,8 @@ import { TileGroup } from "./tile-group"
 /** A truthy or falsy value, meant to be numeric (1 | 0) or boolean (true | false) */
 type TruthyOrFalsy = number | boolean
 
-type Coords = {
-  x: number
-  y: number
-}
-
 type BoardOptions = {
-  lives: number
+  lives?: number
 }
 
 /** The board on which the nonogram puzzle is set up and solved */
@@ -25,6 +20,8 @@ class Board {
   /** The current status of the board */
   private #state: BoardStateEnum
 
+  /** Whether or not lives are being taken into account (losing is possible) */
+  private #usingLives: () => boolean
   /** Whether or not all filled tiles have been opened and empty tiles have been flagged */
   private #allTilesOpened: () => boolean
   /** Updates the current state */

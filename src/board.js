@@ -10,6 +10,10 @@ class Board {
   #state = BoardStateEnum.GENERATING;
   #lives = 0;
 
+  get #usingLives() {
+    return this.#lives !== null
+  }
+
   get #allTilesOpened() {
     // Every filled tile has been opened and every empty tile has been flagged
     return this.#grid.every((row) =>
@@ -23,7 +27,7 @@ class Board {
 
   #refreshState() {
     // If no lives remain, FAILED
-    if (this.#lives <= 0) {
+    if (this.#usingLives && this.#lives <= 0) {
       this.#state = BoardStateEnum.FAILED;
       // If all tiles are opened/flagged, COMPLETE
     } else if (this.#allTilesOpened) {
@@ -41,10 +45,11 @@ class Board {
 
       // If the tile was marked wrong, deduct a life and return false
       if (this.#grid[y][x].state === TileStateEnum.WRONG) {
-        this.#lives -= 1;
+        if (this.#usingLives) this.#lives -= 1;
         return false;
       }
 
+      // Open the tile in any row group it belongs to
       this.#rows = this.#rows.map((set, setIndex) => {
         return setIndex !== y
           ? set
@@ -58,6 +63,7 @@ class Board {
             });
       });
 
+      // Open the tile in any column group it belongs to
       this.#cols = this.#cols.map((set, setIndex) => {
         return setIndex !== x
           ? set
@@ -71,6 +77,7 @@ class Board {
             });
       });
 
+      // If every filled tile in the row is opened, flag the rest of the row
       for (let [setIndex, set] of this.#rows.entries()) {
         if (setIndex === y && set.every((group) => group.allTilesOpened)) {
           this.#grid[y] = this.#grid[y].map((tile) => {
@@ -86,6 +93,7 @@ class Board {
         }
       }
 
+      // If every filled tile in the column is opened, flag the rest of the column
       for (let [setIndex, set] of this.#cols.entries()) {
         if (setIndex === x && set.every((group) => group.allTilesOpened)) {
           this.#grid = this.#grid.map((row) =>
@@ -93,7 +101,8 @@ class Board {
               if (
                 tile.x === x &&
                 !tile.filled &&
-                tile.state === TileStateEnum.CLOSED
+                tile.state === TileStateEnum.CLOSED &&
+                !tile.flagged
               )
                 tile.toggleFlag();
 
@@ -112,28 +121,10 @@ class Board {
     if (this.#state !== BoardStateEnum.GENERATING) {
       // Flag the tile
       this.#grid[y][x].toggleFlag();
-
-      // Find any matches in row groups and flag them as well
-      for (let rowSet of this.#rows) {
-        for (let rowGroup of rowSet) {
-          for (let rowTile of rowGroup) {
-            if (rowTile.x === x && rowTile.y === y) rowTile.toggleFlag();
-          }
-        }
-      }
-
-      // Find any matches in column groups and flag them as well
-      for (let colSet of this.#cols) {
-        for (let colGroup of colSet) {
-          for (let colTile of colGroup) {
-            if (colTile.x === x && colTile.y === y) colTile.toggleFlag();
-          }
-        }
-      }
     }
   }
 
-  constructor(grid, opts = {}) {
+  constructor(grid, opts = { lives: null }) {
     // Create the `Tiles` from the passed-in grid
     grid = grid.map((row, y) => row.map((tile, x) => new Tile(tile, x, y)));
 
