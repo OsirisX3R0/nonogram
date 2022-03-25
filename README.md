@@ -15,4 +15,9 @@ let board = new Board(
   ],
   { lives: 5 }
 );
+
+console.log(board.state); // GENERATED
+
+board.toggleOpenMany([{ x: 0, y: 0 }]);
+console.log(board.lives); // 4
 ```
