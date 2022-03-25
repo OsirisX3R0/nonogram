@@ -11,7 +11,7 @@ class Board {
   #lives = 0;
 
   get #usingLives() {
-    return this.#lives !== null
+    return this.#lives !== null;
   }
 
   get #allTilesOpened() {

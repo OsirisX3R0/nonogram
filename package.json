@@ -1,7 +1,7 @@
 {
-  "name": "nonogram",
+  "name": "nonogram-maker",
   "version": "1.0.0",
-  "description": "",
+  "description": "Utilities for building a nonogram puzzle and solving it.",
   "main": "index.js",
   "typings": "./index.d.ts",
   "scripts": {
