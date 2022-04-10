@@ -38,7 +38,7 @@ class Tile {
       // If the space is not filled, flag it and mark it as wrong
       if (!this.#filled) {
         this.toggleFlag();
-        this.#state = TileStateEnum.WRONG
+        this.#state = TileStateEnum.WRONG;
         return;
       }
 
@@ -51,7 +51,7 @@ class Tile {
   }
 
   toggleFlag() {
-    this.#flagged = !this.#flagged;
+    if (this.#state === TileStateEnum.CLOSED) this.#flagged = !this.#flagged;
   }
 }
 
