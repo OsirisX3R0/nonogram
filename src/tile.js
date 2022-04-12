@@ -48,6 +48,8 @@ class Tile {
           ? TileStateEnum.OPEN
           : TileStateEnum.CLOSED;
     }
+
+    if (this.#state === TileStateEnum.WRONG) return;
   }
 
   toggleFlag() {
