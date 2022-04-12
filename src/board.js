@@ -40,7 +40,7 @@ class Board {
 
   #toggleTileOpen(x, y) {
     if (this.#state !== BoardStateEnum.GENERATING) {
-      let flagged = this.this.#grid[y][x].flagged;
+      let flagged = this.#grid[y][x].flagged;
       // Open the tile
       this.#grid[y][x].toggleOpen();
 
