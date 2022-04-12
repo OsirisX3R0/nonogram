@@ -40,11 +40,12 @@ class Board {
 
   #toggleTileOpen(x, y) {
     if (this.#state !== BoardStateEnum.GENERATING) {
+      let flagged = this.this.#grid[y][x].flagged;
       // Open the tile
       this.#grid[y][x].toggleOpen();
 
-      // If the tile was marked wrong, deduct a life and return false
-      if (this.#grid[y][x].state === TileStateEnum.WRONG) {
+      // If the tile was marked wrong (and was not already flagged as wrong), deduct a life and return false
+      if (flagged && this.#grid[y][x].state === TileStateEnum.WRONG) {
         if (this.#usingLives) this.#lives -= 1;
         return false;
       }
