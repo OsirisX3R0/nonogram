@@ -1,22 +1,43 @@
-const BoardStateEnum = require("./enums/BoardStateEnum");
-const TileStateEnum = require("./enums/TileStateEnum");
-const Tile = require("./tile");
-const TileGroup = require("./tile-group");
+import BoardStateEnum from "./enums/BoardStateEnum";
+import TileStateEnum from "./enums/TileStateEnum";
+import Tile from "./Tile";
+import TileGroup from "./TileGroup";
 
+/** Options parameter for generating a new board */
+type BoardOptions = {
+  /** Optional amount of lives to begin the game with */
+  lives?: number
+}
+
+type TileGroupParam = {
+  /** Number of tiles in the group */
+  count: number,
+  /** Tiles in the group */
+  tiles: Tile[]
+}
+
+/** The board on which the nonogram puzzle is set up and solved */
 class Board {
-  #grid = [];
-  #rows = [];
-  #cols = [];
-  #state = BoardStateEnum.GENERATING;
-  #lives = 0;
+  /** The grid layout for the board */
+  private _grid: Tile[][] = [];
+  /** The number groups for each row */
+  private _rows: TileGroup[][] = [];
+  /** The number groups for each column */
+  private _cols: TileGroup[][] = [];
+  /** The current status of the board */
+  private _state: BoardStateEnum = BoardStateEnum.GENERATING;
+  /** Amount of lives to begin the game with */
+  private _lives: number = 0;
 
-  get #usingLives() {
-    return this.#lives !== null;
+  /** Whether or not lives are being taken into account (losing is possible) */
+  private usingLives(): boolean {
+    return this._lives !== null;
   }
 
-  get #allTilesOpened() {
+  /** Whether or not all filled tiles have been opened and empty tiles have been flagged */
+  private allTilesOpened(): boolean {
     // Every filled tile has been opened and every empty tile has been flagged
-    return this.#grid.every((row) =>
+    return this._grid.every((row) =>
       row.every(
         (tile) =>
           (tile.filled && tile.state === TileStateEnum.OPEN) ||
@@ -25,33 +46,35 @@ class Board {
     );
   }
 
-  #refreshState() {
+  /** Updates the current state */
+  private refreshState() {
     // If no lives remain, FAILED
-    if (this.#usingLives && this.#lives <= 0) {
-      this.#state = BoardStateEnum.FAILED;
+    if (this.usingLives() && this._lives <= 0) {
+      this._state = BoardStateEnum.FAILED;
       // If all tiles are opened/flagged, COMPLETE
-    } else if (this.#allTilesOpened) {
-      this.#state = BoardStateEnum.COMPLETE;
+    } else if (this.allTilesOpened()) {
+      this._state = BoardStateEnum.COMPLETE;
       // Otherwise, STARTED (default)
     } else {
-      this.#state = BoardStateEnum.STARTED;
+      this._state = BoardStateEnum.STARTED;
     }
   }
 
-  #toggleTileOpen(x, y) {
-    if (this.#state !== BoardStateEnum.GENERATING) {
-      let flagged = this.#grid[y][x].flagged;
+  /** Toggles whether or not a tile is opened */
+  private toggleTileOpen(x:number, y:number) {
+    if (this._state !== BoardStateEnum.GENERATING) {
+      let flagged = this._grid[y][x].flagged;
       // Open the tile
-      this.#grid[y][x].toggleOpen();
+      this._grid[y][x].toggleOpen();
 
       // If the tile was marked wrong (and was not already flagged as wrong), deduct a life and return false
-      if (!flagged && this.#grid[y][x].state === TileStateEnum.WRONG) {
-        if (this.#usingLives) this.#lives -= 1;
+      if (!flagged && this._grid[y][x].state === TileStateEnum.WRONG) {
+        if (this.usingLives()) this._lives -= 1;
         return false;
       }
 
       // Open the tile in any row group it belongs to
-      this.#rows = this.#rows.map((set, setIndex) => {
+      this._rows = this._rows.map((set, setIndex) => {
         return setIndex !== y
           ? set
           : set.map((group) => {
@@ -65,7 +88,7 @@ class Board {
       });
 
       // Open the tile in any column group it belongs to
-      this.#cols = this.#cols.map((set, setIndex) => {
+      this._cols = this._cols.map((set, setIndex) => {
         return setIndex !== x
           ? set
           : set.map((group) => {
@@ -79,9 +102,9 @@ class Board {
       });
 
       // If every filled tile in the row is opened, flag the rest of the row
-      for (let [setIndex, set] of this.#rows.entries()) {
+      for (let [setIndex, set] of this._rows.entries()) {
         if (setIndex === y && set.every((group) => group.allTilesOpened)) {
-          this.#grid[y] = this.#grid[y].map((tile) => {
+          this._grid[y] = this._grid[y].map((tile) => {
             if (
               !tile.filled &&
               tile.state === TileStateEnum.CLOSED &&
@@ -95,9 +118,9 @@ class Board {
       }
 
       // If every filled tile in the column is opened, flag the rest of the column
-      for (let [setIndex, set] of this.#cols.entries()) {
+      for (let [setIndex, set] of this._cols.entries()) {
         if (setIndex === x && set.every((group) => group.allTilesOpened)) {
-          this.#grid = this.#grid.map((row) =>
+          this._grid = this._grid.map((row) =>
             row.map((tile) => {
               if (
                 tile.x === x &&
@@ -118,24 +141,30 @@ class Board {
     }
   }
 
-  #toggleTileFlag(x, y) {
-    if (this.#state !== BoardStateEnum.GENERATING) {
+  /** Toggles whether or not a tile is flagged */
+  private toggleTileFlag(x: number, y: number) {
+    if (this._state !== BoardStateEnum.GENERATING) {
       // Flag the tile
-      this.#grid[y][x].toggleFlag();
+      this._grid[y][x].toggleFlag();
     }
   }
 
-  constructor(grid, opts = { lives: null }) {
+  /**
+    * Creates a new `Board` instance
+    * @param grid 2-dimensional grid of truthy and falsy values to notate filled and empty squares, respectively
+    * @param opts Additional options for the board
+    */
+  constructor(initialGrid: (number | boolean)[][], opts: BoardOptions = { lives: null }) {
     // Create the `Tiles` from the passed-in grid
-    grid = grid.map((row, y) => row.map((tile, x) => new Tile(tile, x, y)));
+    let grid: Tile[][] = initialGrid.map((row, y) => row.map((tile, x) => new Tile(tile, x, y)));
 
     // Counter for each row (reset after each, by design)
-    let rowCount = 0;
-    let rows = grid.reduce(
+    let rowCount: number = 0;
+    let rows: TileGroup[][] = grid.reduce(
       (rows, row) => [
         ...rows,
         // Check each tile in each row in the grid
-        row.reduce((groups, tile, tileIndex) => {
+        row.reduce((groups: TileGroup[], tile: Tile, tileIndex: number) => {
           // If falsey...
           if (!tile.filled) {
             // Either save the current count or continue on if it is 0
@@ -145,7 +174,7 @@ class Board {
               ? groups.length
                 ? groups.map((group, i) => {
                     return i === groups.length - 1
-                      ? new TileGroup({ ...group, count })
+                      ? new TileGroup({ ...group, count } as TileGroupParam)
                       : group;
                   })
                 : [new TileGroup({ count, tiles: [tile] })]
@@ -154,7 +183,7 @@ class Board {
           } else {
             // If the last group is already completed, add an empty one
             if (groups.length && groups[groups.length - 1].count) {
-              groups = [...groups, { count: 0, tiles: [] }];
+              groups = [...groups, { count: 0, tiles: [] }] as TileGroup[];
             }
             // Iterate the count
             rowCount++;
@@ -182,12 +211,12 @@ class Board {
         }, []),
       ],
       []
-    );
+    ) as TileGroup[][];
 
     // Array of counters for columns
     let colCount = grid[0].map((_) => 0);
     // Array of empty arrays to create column groups
-    let cols = grid[0].map((_) => []);
+    let cols: TileGroup[][] = grid[0].map((_) => []);
     // Check each tile in each row in the grid
     for (let [rowIndex, row] of grid.entries()) {
       for (let [tileIndex, tile] of row.entries()) {
@@ -200,7 +229,7 @@ class Board {
             cols[tileIndex] = cols[tileIndex].length
               ? cols[tileIndex].map((group, i) => {
                   return i === cols[tileIndex].length - 1
-                    ? new TileGroup({ ...group, count })
+                    ? new TileGroup({ ...group, count } as TileGroupParam)
                     : group;
                 })
               : [new TileGroup({ count, tiles: [tile] })];
@@ -212,7 +241,7 @@ class Board {
             cols[tileIndex].length &&
             cols[tileIndex][cols[tileIndex].length - 1].count
           ) {
-            cols[tileIndex] = [...cols[tileIndex], { count: 0, tiles: [] }];
+            cols[tileIndex] = [...cols[tileIndex], { count: 0, tiles: [] } as TileGroup];
           }
 
           // Iterate the count
@@ -232,10 +261,10 @@ class Board {
             cols[tileIndex] = cols[tileIndex].length
               ? cols[tileIndex].map((group, i) => {
                   return i === cols[tileIndex].length - 1
-                    ? { ...group, tiles: [...group.tiles, tile] }
+                    ? { ...group, tiles: [...group.tiles, tile] } as TileGroup
                     : group;
                 })
-              : [{ count: 0, tiles: [tile] }];
+              : [{ count: 0, tiles: [tile] } as TileGroup];
           }
         }
       }
@@ -244,7 +273,7 @@ class Board {
     // If a row has no groups, flag all tiles
     for (let [i, rowSet] of rows.entries()) {
       if (!rowSet.length) {
-        for (let tile of rowSet[i]) {
+        for (let tile of rowSet[i].tiles) {
           tile.toggleFlag();
         }
       }
@@ -259,54 +288,61 @@ class Board {
       }
     }
 
-    this.#grid = grid;
+    this._grid = grid;
 
-    this.#rows = rows;
+    this._rows = rows;
 
-    this.#cols = cols;
+    this._cols = cols;
 
-    this.#lives = opts.lives;
+    this._lives = opts.lives;
 
-    this.#state = BoardStateEnum.GENERATED;
+    this._state = BoardStateEnum.GENERATED;
   }
 
+   /** The grid layout for the board */
   get grid() {
-    return this.#grid;
+    return this._grid;
   }
 
+   /** The number groups for each row */
   get rows() {
-    return this.#rows;
+    return this._rows;
   }
 
+   /** The number groups for each column */
   get cols() {
-    return this.#cols;
+    return this._cols;
   }
 
+   /** The current status of the board */
   get state() {
-    return this.#state;
+    return this._state;
   }
 
+  /** Amount of lives to begin the game with */
   get lives() {
-    return this.#lives;
+    return this._lives;
   }
 
-  toggleOpenMany(tiles) {
+  /** Toggles whether or not a range of tiles is opened */
+  toggleOpenMany(tiles: Tile[]) {
     let cont = true;
     for (let tile of tiles) {
       // Opening many stops when a wrong tile is detected
-      if (cont) cont = this.#toggleTileOpen(tile.x, tile.y);
+      if (cont) cont = this.toggleTileOpen(tile.x, tile.y);
     }
 
-    this.#refreshState();
+    this.refreshState();
   }
 
-  toggleFlagMany(tiles) {
+  /** Toggles whether or not a range of tiles is flagged */
+  toggleFlagMany(tiles: Tile[]) {
     for (let tile of tiles) {
-      this.#toggleTileFlag(tile.x, tile.y);
+      this.toggleTileFlag(tile.x, tile.y);
     }
 
-    this.#refreshState();
+    this.refreshState();
   }
 }
 
-module.exports = Board;
+export default Board;
