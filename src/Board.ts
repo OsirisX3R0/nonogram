@@ -3,10 +3,12 @@ import TileStateEnum from "./enums/TileStateEnum";
 import Tile from "./Tile";
 import TileGroup from "./TileGroup";
 
+type Lives = number
+
 /** Options parameter for generating a new board */
 type BoardOptions = {
   /** Optional amount of lives to begin the game with */
-  lives?: number
+  lives?: Lives
 }
 
 type TileGroupParam = {
@@ -27,7 +29,7 @@ class Board {
   /** The current status of the board */
   private _state: BoardStateEnum = BoardStateEnum.GENERATING;
   /** Amount of lives to begin the game with */
-  private _lives: number = 0;
+  private _lives?: Lives = 0;
 
   /** Whether or not lives are being taken into account (losing is possible) */
   private usingLives(): boolean {
@@ -47,7 +49,7 @@ class Board {
   }
 
   /** Updates the current state */
-  private refreshState() {
+  private refreshState(): void {
     // If no lives remain, FAILED
     if (this.usingLives() && this._lives <= 0) {
       this._state = BoardStateEnum.FAILED;
@@ -61,7 +63,7 @@ class Board {
   }
 
   /** Toggles whether or not a tile is opened */
-  private toggleTileOpen(x:number, y:number) {
+  private toggleTileOpen(x:number, y:number): boolean {
     if (this._state !== BoardStateEnum.GENERATING) {
       let flagged = this._grid[y][x].flagged;
       // Open the tile
@@ -300,32 +302,32 @@ class Board {
   }
 
    /** The grid layout for the board */
-  get grid() {
+  get grid(): Tile[][] {
     return this._grid;
   }
 
    /** The number groups for each row */
-  get rows() {
+  get rows(): TileGroup[][] {
     return this._rows;
   }
 
    /** The number groups for each column */
-  get cols() {
+  get cols(): TileGroup[][] {
     return this._cols;
   }
 
    /** The current status of the board */
-  get state() {
+  get state(): BoardStateEnum {
     return this._state;
   }
 
   /** Amount of lives to begin the game with */
-  get lives() {
+  get lives(): Lives {
     return this._lives;
   }
 
   /** Toggles whether or not a range of tiles is opened */
-  toggleOpenMany(tiles: Tile[]) {
+  toggleOpenMany(tiles: Tile[]): void {
     let cont = true;
     for (let tile of tiles) {
       // Opening many stops when a wrong tile is detected
@@ -336,7 +338,7 @@ class Board {
   }
 
   /** Toggles whether or not a range of tiles is flagged */
-  toggleFlagMany(tiles: Tile[]) {
+  toggleFlagMany(tiles: Tile[]):void {
     for (let tile of tiles) {
       this.toggleTileFlag(tile.x, tile.y);
     }
