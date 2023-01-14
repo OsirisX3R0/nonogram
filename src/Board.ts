@@ -64,6 +64,8 @@ class Board {
 
   /** Toggles whether or not a tile is opened */
   private toggleTileOpen(x:number, y:number): boolean {
+    if (this._grid.length < y || this._grid[0].length < x) return false
+
     if (this._state !== BoardStateEnum.GENERATING) {
       let flagged = this._grid[y][x].flagged;
       // Open the tile
